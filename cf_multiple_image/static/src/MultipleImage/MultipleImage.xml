@@ -1,0 +1,13 @@
+<t t-name="MultipleImage" owl="1">
+    <t t-if="state.imageIds">
+        <div class="row g-4">
+            <t t-foreach="state.imageIds" t-as="imgId" t-key="imgId">
+                <div class="col col-2">
+                    <div class="card shadow-sm border-0">
+                        <img t-att-src="'/web/content/' + imgId" class="card-img-top img-fluid" alt="Image"/>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</t>
