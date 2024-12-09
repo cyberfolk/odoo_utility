@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cf_hex_base.O2mExpandPopup">
+        <button class="btn btn-primary align-self-start" t-on-click="goToViewForm"
+                t-att-class="invisible ? 'd-none' : ''">
+            <i class="fa fa-expand"/>
+            <span> Expand</span>
+        </button>
+    </t>
+</templates>
