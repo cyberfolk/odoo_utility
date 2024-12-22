@@ -1,0 +1,32 @@
+<odoo>
+    <record id="todo_view_search" model="ir.ui.view">
+        <field name="name">todo.search</field>
+        <field name="model">todo</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="description"/>
+                <filter name="filter_no_completed" string="Non Completate" domain="[('completed', '=', False)]"/>
+                <filter name="groupby_importance" string="Importanza" context="{'group_by': 'importance'}"/>
+                <filter name="groupby_type" string="Tipo" context="{'group_by': 'type'}"/>
+                <filter name="groupby_time" string="Tempo" context="{'group_by': 'time'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="todo_view_tree" model="ir.ui.view">
+        <field name="name">todo.tree</field>
+        <field name="model">todo</field>
+        <field name="arch" type="xml">
+            <tree editable="top" decoration-muted="completed">
+                <field name="sequence" widget="handle"/>
+                <field name="type"/>
+                <field name="name"/>
+                <field name="time" widget="float_time"/>
+                <field name="description" class="fst-italic"/>
+                <field name="importance"/>
+                <field name="completed"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,12 @@
+<odoo>
+    <record id="action_menu_todo" model="ir.actions.act_window">
+        <field name="name">TODO</field>
+        <field name="res_model">todo</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_filter_no_completed':1}</field>
+    </record>
+
+    <menuitem sequence="0" id="menu_root" name="TODO"
+              web_icon="cf_todo,static/description/icon.png"
+              action="action_menu_todo"/>
+</odoo>
