@@ -18,13 +18,14 @@
         <field name="name">todo.tree</field>
         <field name="model">todo</field>
         <field name="arch" type="xml">
-            <tree editable="top" decoration-muted="completed">
+            <tree editable="top" decoration-muted="completed" decoration-success="focus">
                 <field name="sequence" widget="handle"/>
                 <field name="type"/>
                 <field name="name"/>
                 <field name="time" widget="float_time"/>
                 <field name="description" class="fst-italic"/>
                 <field name="importance"/>
+                <field name="focus"/>
                 <field name="completed"/>
             </tree>
         </field>

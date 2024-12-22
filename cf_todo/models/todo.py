@@ -41,6 +41,10 @@ class Todo(models.Model):
         default=False
     )
 
+    focus = fields.Boolean(
+        string="Focus",
+    )
+
     @api.constrains('importance')
     def _check_importance(self):
         if self.importance < 1 or self.importance > 5:
