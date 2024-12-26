@@ -3,7 +3,7 @@
 
 {
     'name': "Cyberfolk | Many2Many Tags Link",
-    'icon': '/cf_hex_base/static/description/cyberfolk.png',
+    'icon': '/cf_m2m_tags_link/static/description/cyberfolk.png',
     'version': '17.0',
     'category': 'Utility',
     'author': "cyberfolk",

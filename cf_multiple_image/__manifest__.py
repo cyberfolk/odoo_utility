@@ -3,7 +3,7 @@
 
 {
     'name': "Cyberfolk | Multiple Image",
-    'icon': '/cf_hex_base/static/description/cyberfolk.png',
+    'icon': '/cf_multiple_image/static/description/cyberfolk.png',
     'version': '17.0',
     'category': 'Utility',
     'author': "cyberfolk",

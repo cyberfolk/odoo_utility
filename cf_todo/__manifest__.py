@@ -6,7 +6,7 @@
     'icon': '/cf_todo/static/description/icon.png',
     'sequence': 2,
     'version': '0.0.1',
-    'category': 'Map',
+    'category': 'Utility',
     'author': "cyberfolk",
     'summary': "Introduce i TODO.",
     'description':

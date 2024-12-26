@@ -3,7 +3,7 @@
 
 {
     'name': "Cyberfolk | One2Many Expand Popup",
-    'icon': '/cf_hex_base/static/description/cyberfolk.png',
+    'icon': '/cf_o2m_expand_popup/static/description/cyberfolk.png',
     'version': '17.0',
     'category': 'Utility',
     'author': "cyberfolk",
