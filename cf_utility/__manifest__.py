@@ -12,7 +12,9 @@
     'description':
         """Raccolta di utility per lo sviluppo.""",
     'license': 'AGPL-3',
-    'data': [],
+    'data': [
+        "data/dev_cron.xml",
+    ],
     'depends': [],
     'demo': [],
     'application': False,
