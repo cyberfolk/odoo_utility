@@ -17,10 +17,16 @@
         "views/menu_root.xml",
         "views/todo.xml",
     ],
+    'assets': {
+        'web.assets_backend': [
+            '/cf_todo/static/src/css/style.css',
+        ],
+        'web.assets_frontend': [
+            '/cf_todo/static/src/css/style.css',
+        ]
+    },
     'depends': [],
     'demo': [],
     'application': True,
     'installable': True,
-    'assets': {
-    },
 }

@@ -1,0 +1,7 @@
+th[data-name="score"] *,
+td[name="score"] {
+text-align: center !important;
+}
+th[data-name="score"] {
+width: 50px !important;
+}

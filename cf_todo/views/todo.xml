@@ -20,13 +20,14 @@
         <field name="arch" type="xml">
             <tree editable="top" decoration-muted="completed" decoration-success="focus">
                 <field name="sequence" widget="handle"/>
+                <field name="score" string="⭐" optional="show" widget="percentage"/>
                 <field name="type"/>
                 <field name="name"/>
+                <field name="importance"/>
                 <field name="time" widget="float_time"/>
                 <field name="description" class="fst-italic"/>
-                <field name="importance"/>
                 <field name="focus"/>
-                <field name="completed"/>
+                <field name="completed" optional="hide"/>
             </tree>
         </field>
     </record>

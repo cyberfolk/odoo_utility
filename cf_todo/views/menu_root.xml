@@ -6,6 +6,15 @@
         <field name="context">{'search_default_filter_no_completed':1}</field>
     </record>
 
+    <record id="action_todo_completed" model="ir.actions.server">
+        <field name="name">Completate</field>
+        <field name="model_id" ref="cf_todo.model_todo"/>
+        <field name="binding_model_id" ref="cf_todo.model_todo"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.complete_todo()</field>
+    </record>
+
     <menuitem sequence="0" id="menu_root" name="TODO"
               web_icon="cf_todo,static/description/icon.png"
               action="action_menu_todo"/>
