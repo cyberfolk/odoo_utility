@@ -1,0 +1,20 @@
+<odoo>
+    <record id="action_menu_web_scraper" model="ir.actions.act_window">
+        <field name="name">Web Scraper</field>
+        <field name="res_model">web.scraper</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--    <record id="action_web_scraper_completed" model="ir.actions.server">-->
+    <!--        <field name="name">Web Scraper</field>-->
+    <!--        <field name="model_id" ref="cf_web_scraper.model_web_scraper"/>-->
+    <!--        <field name="binding_model_id" ref="cf_web_scraper.model_web_scraper"/>-->
+    <!--        <field name="binding_view_types">list</field>-->
+    <!--        <field name="state">code</field>-->
+    <!--        <field name="code">action = records.complete_web_scraper()</field>-->
+    <!--    </record>-->
+
+    <menuitem sequence="0" id="menu_web_scraper" name="Web Scraper"
+              web_icon="cf_web_scraper,static/description/icon.png"
+              action="action_menu_web_scraper"/>
+</odoo>
