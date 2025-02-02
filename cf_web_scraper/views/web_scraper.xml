@@ -27,7 +27,7 @@
                         <group colspan="2">
                             <field name="model_id"/>
                         </group>
-                        <group string="URLs">
+                        <group string="URLs" name="g_urls">
                             <div class="w-100 d-flex" colspan="2">
                                 <field name="urls_state" widget="badge" nolabel="1" style="width: 20%"
                                        decoration-muted="urls_state == 'url-draft'"
@@ -35,10 +35,11 @@
                                        decoration-danger="urls_state == 'url-invalid'"
                                 />
                                 <field name="urls" nolabel="1" style="width: 80%" placeholder=" -- Inserisci URL --"/>
+
                             </div>
                             <field name="urls_errors" invisible="urls_state in ['url-draft', 'url-valid']"/>
                         </group>
-                        <group string="Parametri">
+                        <group string="Parametri" name="g_tags">
                             <div class="w-100 d-flex" colspan="2">
                                 <field name="tags_state" widget="badge" nolabel="1" style="width: 20%"
                                        decoration-muted="tags_state == 'tag-draft'"
@@ -49,7 +50,7 @@
                             </div>
                             <field name="tags_errors" invisible="tags_state in ['tag-draft', 'tag-valid']"/>
                         </group>
-                        <group string="Dati Estratti">
+                        <group string="Dati Estratti" name="g_datas">
                             <div class="w-100 d-flex" colspan="2">
                                 <field name="datas_state" widget="badge" nolabel="1" style="width: 20%"
                                        decoration-muted="datas_state == 'data-draft'"
