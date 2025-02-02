@@ -28,37 +28,50 @@
                             <field name="model_id"/>
                         </group>
                         <group string="URLs" name="g_urls">
+                            <field name="urls_state" widget="badge" string="Stato"
+                                   decoration-muted="urls_state == 'url-draft'"
+                                   decoration-success="urls_state == 'url-valid'"
+                                   decoration-danger="urls_state == 'url-invalid'"
+                            />
                             <div class="w-100 d-flex" colspan="2">
-                                <field name="urls_state" widget="badge" nolabel="1" style="width: 20%"
-                                       decoration-muted="urls_state == 'url-draft'"
-                                       decoration-success="urls_state == 'url-valid'"
+                                <div class="o_form_label fw-bold" style="width: 7%;">URLs</div>
+                                <field name="urls_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
+                                <field name="urls" placeholder=" -- Inserisci URL --" invisible="not urls_toggle" nolabel="1" style="width: 87%"
                                        decoration-danger="urls_state == 'url-invalid'"
                                 />
-                                <field name="urls" nolabel="1" style="width: 80%" placeholder=" -- Inserisci URL --"/>
-
                             </div>
-                            <field name="urls_errors" invisible="urls_state in ['url-draft', 'url-valid']"/>
+                            <div class="w-100 d-flex" colspan="2" invisible="urls_state in ['url-draft', 'url-valid']">
+                                <div class="o_form_label fw-bold" style="width: 7%;">Errori</div>
+                                <field name="urls_errors_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
+                                <field name="urls_errors" string="Errori" invisible="not urls_errors_toggle" nolabel="1" style="width: 87%" readonly="1"/>
+                            </div>
                         </group>
                         <group string="Parametri" name="g_tags">
+                            <field name="tags_state" widget="badge" string="Stato"
+                                   decoration-muted="tags_state == 'tag-draft'"
+                                   decoration-success="tags_state == 'tag-valid'"
+                                   decoration-danger="tags_state == 'tag-invalid'"
+                            />
                             <div class="w-100 d-flex" colspan="2">
-                                <field name="tags_state" widget="badge" nolabel="1" style="width: 20%"
-                                       decoration-muted="tags_state == 'tag-draft'"
-                                       decoration-success="tags_state == 'tag-valid'"
+                                <div class="o_form_label fw-bold" style="width: 7%;">TAGs</div>
+                                <field name="tags_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
+                                <field name="tags" placeholder=" -- Inserisci URL --" invisible="not tags_toggle" nolabel="1" style="width: 87%"
                                        decoration-danger="tags_state == 'tag-invalid'"
                                 />
-                                <field name="tags" nolabel="1" style="width: 80%" placeholder=" -- Inserisci Parametri --"/>
                             </div>
-                            <field name="tags_errors" invisible="tags_state in ['tag-draft', 'tag-valid']"/>
+                            <div class="w-100 d-flex" colspan="2" invisible="tags_state in ['tag-draft', 'tag-valid']">
+                                <div class="o_form_label fw-bold" style="width: 7%;">Errori</div>
+                                <field name="tags_errors_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
+                                <field name="tags_errors" string="Errori" invisible="not tags_errors_toggle" nolabel="1" style="width: 87%" readonly="1"/>
+                            </div>
                         </group>
                         <group string="Dati Estratti" name="g_datas">
-                            <div class="w-100 d-flex" colspan="2">
-                                <field name="datas_state" widget="badge" nolabel="1" style="width: 20%"
-                                       decoration-muted="datas_state == 'data-draft'"
-                                       decoration-success="datas_state == 'data-valid'"
-                                       decoration-danger="datas_state == 'data-invalid'"
-                                />
-                                <field name="datas" nolabel="1" style="width: 80%" placeholder=" -- Dati non ancora estratti --"/>
-                            </div>
+                            <field name="datas_state" widget="badge"
+                                   decoration-muted="datas_state == 'data-draft'"
+                                   decoration-success="datas_state == 'data-valid'"
+                                   decoration-danger="datas_state == 'data-invalid'"
+                            />
+                            <field name="datas" placeholder=" -- Dati non ancora estratti --"/>
                             <field name="datas_errors" invisible="datas_state in ['data-draft', 'data-valid']"/>
                         </group>
                     </group>

@@ -39,8 +39,18 @@ class WebScraper(models.Model):
         help="Lista di URLs da cui recuperare i dati",
     )
 
+    urls_toggle = fields.Boolean(
+        string="URLs Mostra",
+        default=True,
+    )
+
     urls_errors = fields.Text(
         string="URLs Errori",
+    )
+
+    urls_errors_toggle = fields.Boolean(
+        string="URLs Mostra",
+        default=True,
     )
 
     urls_state = fields.Selection(
@@ -56,7 +66,16 @@ class WebScraper(models.Model):
         help="Lista di TAGs CSS da cercare nel DOM per recuperare i dati",
     )
 
+    tags_toggle = fields.Boolean(
+        string="TAGs Mostra",
+        default=True,
+    )
+
     tags_errors = fields.Text(
+        string="TAGs Errori",
+    )
+
+    tags_errors_toggle = fields.Text(
         string="TAGs Errori",
     )
 
