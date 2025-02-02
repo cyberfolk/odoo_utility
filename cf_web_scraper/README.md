@@ -2,7 +2,7 @@
 
 **Initial commit**: 01/02/25
 
-**Technologies**: Odoo, Python, XML, HTML, SCSS e Bootstrap.
+**Stack**: Odoo, Owl, Python, JS, XML, HTML, CSS, SCSS, Bootstrap e BeautifulSoup.
 
 - **cf_web_scraper** In questa APP viene introdotto il modello per fare gli scraper delle pagine web.
 

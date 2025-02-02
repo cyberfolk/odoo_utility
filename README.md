@@ -2,7 +2,7 @@
 
 **Initial commit**: 09/12/24
 
-**Technologies**: Odoo, Python, XML, HTML, SCSS e Bootstrap.
+**Stack**: Odoo, Owl, Python, JS, XML, HTML, CSS, SCSS e Bootstrap.
 
 **Info**: Repo che Moduli di utilità generale per Odoo.
 
