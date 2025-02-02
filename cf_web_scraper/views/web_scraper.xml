@@ -13,6 +13,7 @@
                     <button name="validate_urls" string="Valida URLs" type="object" class="btn btn-primary"/>
                     <button name="validate_tags" string="Valida TAGs" type="object" class="btn btn-primary"/>
                     <button name="scrape_datas" string="Scrape DATAs" type="object" class="btn btn-primary"/>
+                    <button name="create_records" string="Crea RECs" type="object" class="btn btn-primary"/>
                     <!--                    <button name="do_scrape" string="Scrape URL" type="object"/>-->
                     <!--                    <field name="state" widget="statusbar"/>-->
                 </header>
@@ -82,6 +83,25 @@
                                 <div class="o_form_label fw-bold" style="width: 7%;">Errori</div>
                                 <field name="datas_errors_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
                                 <field name="datas_errors" string="Errori" invisible="not datas_errors_toggle" nolabel="1" style="width: 87%" readonly="1"/>
+                            </div>
+                        </group>
+                        <group string="RECORD CREATI" name="g_records">
+                            <field name="records_state" widget="badge" string="Stato"
+                                   decoration-muted="records_state == 'record-draft'"
+                                   decoration-success="records_state == 'record-valid'"
+                                   decoration-danger="records_state == 'record-invalid'"
+                            />
+                            <div class="w-100 d-flex" colspan="2">
+                                <div class="o_form_label fw-bold" style="width: 7%;">RECs</div>
+                                <field name="records_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
+                                <field name="records" invisible="not records_toggle" nolabel="1" style="width: 87%" readonly="1"
+                                       decoration-danger="records_state == 'record-invalid'"
+                                />
+                            </div>
+                            <div class="w-100 d-flex" colspan="2" invisible="records_state in ['record-draft', 'record-valid']">
+                                <div class="o_form_label fw-bold" style="width: 7%;">Errori</div>
+                                <field name="records_errors_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
+                                <field name="records_errors" string="Errori" invisible="not records_errors_toggle" nolabel="1" style="width: 87%" readonly="1"/>
                             </div>
                         </group>
                     </group>

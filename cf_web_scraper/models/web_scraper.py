@@ -76,7 +76,7 @@ class WebScraper(models.Model):
     )
 
     tags_errors_toggle = fields.Text(
-        string="TAGs Errori",
+        string="TAGs Errori Mostra",
     )
 
     tags_state = fields.Selection(
@@ -111,7 +111,33 @@ class WebScraper(models.Model):
         selection=[('data-draft', 'Datas Bozza'), ('data-valid', 'Datas Validi'), ('data-invalid', 'Datas Non Validi')],
         default='data-draft',
     )
+    # endregion --------------------------------------------------------------------------------------------------------
 
+    # region FIELD DATAs -----------------------------------------------------------------------------------------------
+    records = fields.Text(
+        string="RECORDs",
+        help="Dati recuperati tramite lo scraping",
+    )
+
+    records_toggle = fields.Boolean(
+        string="RECORDs Mostra",
+        default=True,
+    )
+
+    records_errors = fields.Text(
+        string="RECORDs Errori",
+    )
+
+    records_errors_toggle = fields.Boolean(
+        string="RECORDs Errori Mostra",
+        default=True,
+    )
+
+    records_state = fields.Selection(
+        string="RECORDs Stato",
+        selection=[('record-draft', 'Datas Bozza'), ('record-valid', 'Datas Validi'), ('record-invalid', 'Datas Non Validi')],
+        default='record-draft',
+    )
     # endregion --------------------------------------------------------------------------------------------------------
 
     def validate_urls(self):
@@ -237,3 +263,14 @@ class WebScraper(models.Model):
         self.datas_state = 'data-invalid' if datas_errors else 'data-valid'
         self.datas_errors = datas_errors if datas_errors else False
         self.datas = json.dumps(datas_list, indent=4)
+
+    def create_records(self):
+        self.ensure_one()
+        if self.datas_state != "data-valid":
+            self.records_state = 'record-invalid'
+            self.records_errors = "Validare il campo Dati prima di procedere."
+            return
+        datas = json.loads(self.datas)
+        self.records = self.env[self.model_id.model].create(datas)
+        self.records_state = 'record-valid'
+        self.records_errors = False
