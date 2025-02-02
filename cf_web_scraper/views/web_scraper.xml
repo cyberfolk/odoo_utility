@@ -10,8 +10,9 @@
                 <!--                    Changing its rounding factor now will not change the rounding made on previous entries; possibly causing an inconsistency with the new ones.-->
                 <!--                </div>-->
                 <header>
-                    <button name="validate_urls" string="Valida URL" type="object" class="btn btn-primary"/>
-                    <button name="validate_tags" string="Valida Parametri" type="object" class="btn btn-primary"/>
+                    <button name="validate_urls" string="Valida URLs" type="object" class="btn btn-primary"/>
+                    <button name="validate_tags" string="Valida TAGs" type="object" class="btn btn-primary"/>
+                    <button name="scrape_datas" string="Scrape DATAs" type="object" class="btn btn-primary"/>
                     <!--                    <button name="do_scrape" string="Scrape URL" type="object"/>-->
                     <!--                    <field name="state" widget="statusbar"/>-->
                 </header>
@@ -48,18 +49,17 @@
                             </div>
                             <field name="tags_errors" invisible="tags_state in ['tag-draft', 'tag-valid']"/>
                         </group>
-                        <!--                        <group>-->
-                        <!--                            <field name="tags"/>-->
-                        <!--                        </group>-->
-                        <!--                        <group>-->
-                        <!--                            <field name="box_tags" readonly="1"/>-->
-                        <!--                        </group>-->
-                        <!--                        <group>-->
-                        <!--                            <field name="box_errors" readonly="1"/>-->
-                        <!--                        </group>-->
-                        <!--                        <group>-->
-                        <!--                            <field name="scraped_data" readonly="1"/>-->
-                        <!--                        </group>-->
+                        <group string="Dati Estratti">
+                            <div class="w-100 d-flex" colspan="2">
+                                <field name="datas_state" widget="badge" nolabel="1" style="width: 20%"
+                                       decoration-muted="datas_state == 'data-draft'"
+                                       decoration-success="datas_state == 'data-valid'"
+                                       decoration-danger="datas_state == 'data-invalid'"
+                                />
+                                <field name="datas" nolabel="1" style="width: 80%" placeholder=" -- Dati non ancora estratti --"/>
+                            </div>
+                            <field name="datas_errors" invisible="datas_state in ['data-draft', 'data-valid']"/>
+                        </group>
                     </group>
                 </sheet>
             </form>
@@ -81,7 +81,7 @@
                 <!--                       decoration-success="state == 'data-created'"-->
                 <!--                       decoration-danger="state in ['error', 'validated-error']"-->
                 <!--                />-->
-<!--                <field name="scraped_data"/>-->
+                <!--                <field name="scraped_data"/>-->
             </tree>
         </field>
     </record>

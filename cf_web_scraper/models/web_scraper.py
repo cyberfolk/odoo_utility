@@ -6,17 +6,15 @@ from bs4 import BeautifulSoup
 
 from odoo import models, fields
 
+payload = ""
+headers = {
+    "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/58.0.3029.110 Safari/537.3"
+}
+
 _logger = logging.getLogger(__name__)
-
-
-# STATE_LIST = [
-#     ('draft', 'Bozza'),
-#     ('url-validated-success', 'Url Validati'),
-#     ('url-validated-error', 'Errore Validazione URL'),
-#     ('data-scraped', 'Dati Estratti'),
-#     ('error', 'Errore'),
-#     ('data-created', 'Dati Creati')
-# ]
 
 
 class WebScraper(models.Model):
@@ -35,20 +33,7 @@ class WebScraper(models.Model):
         help="Modello in cui verranno caricati i dati estratti",
     )
 
-    # state = fields.Selection(
-    #     selection=STATE_LIST,
-    #     string="Stato",
-    #     default="draft",
-    # )
-
-    # box_errors = fields.Text(
-    #     string="Errori Generali",
-    # )
-    #
-    # box_tags = fields.Text(
-    #     string="Errori TAGs",
-    # )
-
+    # region FIELD URLs ------------------------------------------------------------------------------------------------
     urls = fields.Text(
         string="URLs",
         help="Lista di URLs da cui recuperare i dati",
@@ -63,7 +48,9 @@ class WebScraper(models.Model):
         selection=[('url-draft', 'Url Bozza'), ('url-valid', 'Url Validi'), ('url-invalid', 'Url Non Validi')],
         default='url-draft',
     )
+    # endregion --------------------------------------------------------------------------------------------------------
 
+    # region FIELD TAGs ------------------------------------------------------------------------------------------------
     tags = fields.Text(
         string="TAGs",
         help="Lista di TAGs CSS da cercare nel DOM per recuperare i dati",
@@ -75,13 +62,28 @@ class WebScraper(models.Model):
 
     tags_state = fields.Selection(
         string="TAGs Stato",
-        selection=[('tag-draft', 'Bozza'), ('tag-valid', 'Validi'), ('tag-invalid', 'Non Validi')],
+        selection=[('tag-draft', 'Tags Bozza'), ('tag-valid', 'Tags Validi'), ('tag-invalid', 'Tags Non Validi')],
         default='tag-draft',
     )
+    # endregion --------------------------------------------------------------------------------------------------------
 
-    # scraped_data = fields.Text(
-    #     string="Dati Estratti"
-    # )
+    # region FIELD DATAs -----------------------------------------------------------------------------------------------
+    datas = fields.Text(
+        string="DATAs",
+        help="Dati recuperati tramite lo scraping",
+    )
+
+    datas_errors = fields.Text(
+        string="DATAs Errori",
+    )
+
+    datas_state = fields.Selection(
+        string="DATAs Stato",
+        selection=[('data-draft', 'Datas Bozza'), ('data-valid', 'Datas Validi'), ('data-invalid', 'Datas Non Validi')],
+        default='data-draft',
+    )
+
+    # endregion --------------------------------------------------------------------------------------------------------
 
     def validate_urls(self):
         self.ensure_one()
@@ -89,14 +91,14 @@ class WebScraper(models.Model):
 
         if not self.urls:
             self.urls_state = 'url-invalid'
-            self.urls_errors = "Il campo URLs è vuoto"
+            self.urls_errors = "Il campo URLs è vuoto, occorre impostarlo per procedere"
             return
 
         url_list = [url.strip() for url in self.urls.split(',')]  # Rimuove gli spazi
 
         for i, url in enumerate(url_list):
             try:
-                response = requests.get(url, timeout=5)
+                response = requests.get(url, headers=headers, data=payload, timeout=5)
                 response.raise_for_status()
             except Exception as e:
                 urls_errors += f"URL #{i}: {url} → {str(e)}\n"
@@ -104,22 +106,18 @@ class WebScraper(models.Model):
         self.urls_state = 'url-invalid' if urls_errors else 'url-valid'
         self.urls_errors = urls_errors if urls_errors else False
 
-    # @api.onchange("urls")
-    # def _onchange_urls(self):
-    #     self.urls_state = 'invalid'
-
     def validate_tags(self):
         self.ensure_one()
         tags_errors = ""
 
         if not self.tags:
             self.tags_state = 'tag-invalid'
-            self.tags_errors = "Il campo TAGs è vuoto, occorre rimpirlo per procedere."
+            self.tags_errors = "Il campo TAGs è vuoto, occorre impostarlo per procedere."
             return
 
         if not self.model_id:
             self.tags_state = 'tag-invalid'
-            self.tags_errors = "Il campo model_id è vuoto, occorre riempirlo per procedere."
+            self.tags_errors = "Il campo model_id è vuoto, occorre impostarlo per procedere."
             return
 
         try:
@@ -135,8 +133,9 @@ class WebScraper(models.Model):
                 if not isinstance(k, str):
                     tags_errors += f'La "Chiave" = "{k}" deve essere di tipo stringa.\n'
                 if not isinstance(v, str):
-                    tags_errors += f'Il "Valore" = "{v}" deve essere di tipo stringa.\n'
-
+                    tags_errors += f'Nella "Chiave" = "{k}" il "Valore" = "{v}" deve essere di tipo stringa.\n'
+                if not v:
+                    tags_errors += f'Nella "Chiave" = "{k}" il "Valore" = "{v}" non può essere una stringa vuota.\n'
                 if k not in model_fields_name:
                     tags_errors += f'La chiave "{k}" non esiste nel modello "{model_name}.\n'
         except Exception as e:
@@ -145,70 +144,67 @@ class WebScraper(models.Model):
         self.tags_state = 'tag-invalid' if tags_errors else 'tag-valid'
         self.tags_errors = tags_errors if tags_errors else False
 
-    # @api.constrains("urls")
-    # def _check_urls(self):
-    #     for rec in self:
-    #         if not rec.urls:
-    #             continue
-    #         url_list = [url.strip() for url in self.urls.split(',')]  # Rimuove gli spazi
-    #         for i, url in enumerate(url_list, start=1):
-    #             if ' ' in url:
-    #                 raise ValidationError(f"URL #{i}: Rimuovere spazi in \"{url}\".")
-    #             if not url:
-    #                 raise ValidationError(f"Rimuovere URL #{i} perchè vuoto.")
-
-    def do_scrape(self):
+    def scrape_datas(self):
         self.ensure_one()
+        datas_errors = ""
+        datas_list = []
 
-        if not self.urls:
-            self.state = 'url-validated-error'
-            self.box_errors = "Il campo URLs è vuoto"
+        # region CHECK: URLs, TAGs e model_id --------------------------------------------------------------------------
+        if self.urls_state != "url-valid":
+            self.datas_state = 'data-invalid'
+            self.datas_errors = "Validare il campo URLs prima di procedere."
             return
 
-        url_list = [url.strip() for url in self.urls.split(',')]  # Rimuove gli spazi
-        error_info = ""
+        if self.tags_state != "tag-valid":
+            self.datas_state = 'data-invalid'
+            self.datas_errors = "Validare il campo TAGs prima di procedere."
+            return
 
-        # --------------------------------------------------------------------------------------------------------------
+        if not self.urls:
+            self.urls_state = 'url-invalid'
+            self.urls_errors = "Il campo URLs è vuoto, occorre impostarlo per procedere"
+            return
+
+        if not self.tags:
+            self.tags_state = 'tag-invalid'
+            self.tags_errors = "Il campo TAGs è vuoto, occorre impostarlo per procedere."
+            return
+
+        if not self.model_id:
+            self.tags_state = 'tag-invalid'
+            self.tags_errors = "Il campo model_id è vuoto, occorre impostarlo per procedere."
+            return
+        # endregion ----------------------------------------------------------------------------------------------------
+
+        url_list = [url.strip() for url in self.urls.split(',')]  # Rimuove gli spazi
+
+        tag_list = json.loads(self.tags)
+
         for i, url in enumerate(url_list):
             try:
-                response = requests.get(url, timeout=5)
+                response = requests.get(url, headers=headers, data=payload, timeout=5)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.text, 'html.parser')
-                title = soup.find('h1', id='firstHeading')
-                body = soup.find('div', id='mw-content-text')
 
-                # Dizionario per contenere i dati estratti
-                spell_data = {}
+                data_dict = {}
+                data_dict_errors = ""
 
-                # Estrarre il nome dell'incantesimo
-                spell_data["Scuola"] = soup.find("p").text.strip()
-
-                # Estrarre altre informazioni
-                for p in soup.find_all("p")[1:]:  # Saltare il primo paragrafo
-                    text = p.get_text(separator=" ").strip()
-                    if ":" in text:
-                        key, value = text.split(":", 1)
-                        spell_data[key.strip()] = value.strip()
-
-                if spell_data:
-                    self.scraped_data = json.dumps(spell_data, indent=4)
-                    self.state = 'data-scraped'
-                else:
-                    self.state = 'error'
+                for name_field, tag_to_scrape in tag_list.items():
+                    try:
+                        find_tag = soup.select_one(tag_to_scrape)
+                        if not find_tag:
+                            raise Exception(f'Il TAG ha FALLITO la selezione.')
+                        find_value = find_tag.get_text()
+                        data_dict[name_field] = find_value
+                    except Exception as e:
+                        data_dict_errors += f' - Campo "{name_field}" - TAG "{tag_to_scrape}": {str(e)}\n'
+                datas_list.append(data_dict)
+                datas_errors += f"{data_dict_errors}"
+                datas_errors += f"\n" if datas_errors else ""
 
             except Exception as e:
-                error_info += f"URL #{i}: {url} → {str(e)}\n"
+                datas_errors += f"URL #{i}: {url} → {str(e)}\n"
 
-        if not error_info:
-            self.state = 'url-validated-success'
-            self.box_errors = False  # Nessun errore
-        else:
-            self.state = 'url-validated-error'
-            self.box_errors = error_info  # Mostra gli errori
-
-    # def write(self, values):
-    #     tags = values.get('tags')
-    #     if tags:
-    #         tags_data = json.loads(tags)
-    #         values['tags'] = json.dumps(tags_data, indent=4)
-    #     return super(WebScraper, self).write(values)
+        self.datas_state = 'data-invalid' if datas_errors else 'data-valid'
+        self.datas_errors = datas_errors if datas_errors else False
+        self.datas = json.dumps(datas_list, indent=4)
