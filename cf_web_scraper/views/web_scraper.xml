@@ -66,13 +66,23 @@
                             </div>
                         </group>
                         <group string="Dati Estratti" name="g_datas">
-                            <field name="datas_state" widget="badge"
+                            <field name="datas_state" widget="badge" string="Stato"
                                    decoration-muted="datas_state == 'data-draft'"
                                    decoration-success="datas_state == 'data-valid'"
                                    decoration-danger="datas_state == 'data-invalid'"
                             />
-                            <field name="datas" placeholder=" -- Dati non ancora estratti --"/>
-                            <field name="datas_errors" invisible="datas_state in ['data-draft', 'data-valid']"/>
+                            <div class="w-100 d-flex" colspan="2">
+                                <div class="o_form_label fw-bold" style="width: 7%;">DATAs</div>
+                                <field name="datas_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
+                                <field name="datas" invisible="not datas_toggle" nolabel="1" style="width: 87%" readonly="1"
+                                       decoration-danger="datas_state == 'data-invalid'"
+                                />
+                            </div>
+                            <div class="w-100 d-flex" colspan="2" invisible="datas_state in ['data-draft', 'data-valid']">
+                                <div class="o_form_label fw-bold" style="width: 7%;">Errori</div>
+                                <field name="datas_errors_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
+                                <field name="datas_errors" string="Errori" invisible="not datas_errors_toggle" nolabel="1" style="width: 87%" readonly="1"/>
+                            </div>
                         </group>
                     </group>
                 </sheet>

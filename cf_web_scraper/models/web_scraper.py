@@ -49,7 +49,7 @@ class WebScraper(models.Model):
     )
 
     urls_errors_toggle = fields.Boolean(
-        string="URLs Mostra",
+        string="URLs Errori Mostra",
         default=True,
     )
 
@@ -92,8 +92,18 @@ class WebScraper(models.Model):
         help="Dati recuperati tramite lo scraping",
     )
 
+    datas_toggle = fields.Boolean(
+        string="DATAs Mostra",
+        default=True,
+    )
+
     datas_errors = fields.Text(
         string="DATAs Errori",
+    )
+
+    datas_errors_toggle = fields.Boolean(
+        string="DATAs Errori Mostra",
+        default=True,
     )
 
     datas_state = fields.Selection(
