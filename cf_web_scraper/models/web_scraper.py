@@ -144,15 +144,24 @@ class WebScraper(models.Model):
         string="RECs Errori",
     )
 
+    records_warnings = fields.Text(
+        string="RECs Warnings",
+    )
+
     records_errors_toggle = fields.Boolean(
         string="RECs Errori Mostra",
+        default=True,
+    )
+
+    records_warnings_toggle = fields.Boolean(
+        string="RECs Warnings Mostra",
         default=True,
     )
 
     records_state = fields.Selection(
         string="RECs Stato",
         selection=[('record-draft', 'Datas Bozza'), ('record-valid', 'Datas Validi'),
-                   ('record-invalid', 'Datas Non Validi')],
+                   ('record-warning', 'Datas Warning'), ('record-invalid', 'Datas Non Validi')],
         default='record-draft',
     )
 
@@ -302,6 +311,7 @@ class WebScraper(models.Model):
     def create_records(self):
         self.ensure_one()
         records_errors = ""
+        records_warnings = ""
 
         if self.datas_state != "data-valid":
             self.records_state = 'record-invalid'
@@ -312,12 +322,16 @@ class WebScraper(models.Model):
             try:
                 Model = self.env[self.model_id.model]
                 domain = [(x, '=', data[x]) for x in self.__unique__]
+                unique_name = '_'.join([data[x] for x in self.__unique__])
                 rec_exist = Model.search(domain)
                 if rec_exist:
-                    raise Exception(f'SKIP "__unique__": {rec_exist} già nel db: {self.model_id.model}({rec_exist.id})')
-                record = Model.create(data)
+                    msg = f'SKIP - "{unique_name}" già presente nel db: {rec_exist}'
+                    records_warnings += f"{msg}\n"
+                else:
+                    record = Model.create(data)
             except Exception as e:
                 records_errors += f"REC #{i} → {str(e)}\n"
 
-        self.records_state = 'record-invalid' if records_errors else 'record-valid'
+        self.records_state = 'record-invalid' if records_errors else 'record-warning' if records_warnings else 'record-valid'
         self.records_errors = records_errors if records_errors else False
+        self.records_warnings = records_warnings if records_warnings else False
