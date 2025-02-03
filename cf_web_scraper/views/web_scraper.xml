@@ -4,18 +4,11 @@
         <field name="model">web.scraper</field>
         <field name="arch" type="xml">
             <form string="Web Scraper">
-                <!--                <div class="alert alert-warning" role="alert" invisible="not display_rounding_warning">-->
-                <!--                    <strong>Record incompleto.</strong>-->
-                <!--                    <br/>-->
-                <!--                    Changing its rounding factor now will not change the rounding made on previous entries; possibly causing an inconsistency with the new ones.-->
-                <!--                </div>-->
                 <header>
                     <button name="validate_urls" string="Valida URLs" type="object" class="btn btn-primary"/>
                     <button name="validate_tags" string="Valida TAGs" type="object" class="btn btn-primary"/>
                     <button name="scrape_datas" string="Scrape DATAs" type="object" class="btn btn-primary"/>
                     <button name="create_records" string="Crea RECs" type="object" class="btn btn-primary"/>
-                    <!--                    <button name="do_scrape" string="Scrape URL" type="object"/>-->
-                    <!--                    <field name="state" widget="statusbar"/>-->
                 </header>
                 <sheet>
                     <div class="oe_title" colspan="2">

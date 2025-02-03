@@ -58,6 +58,10 @@ class WebScraper(models.Model):
         selection=[('url-draft', 'Url Bozza'), ('url-valid', 'Url Validi'), ('url-invalid', 'Url Non Validi')],
         default='url-draft',
     )
+
+    urls_list = fields.Json(
+        string="URLs List",
+    )
     # endregion --------------------------------------------------------------------------------------------------------
 
     # region FIELD TAGs ------------------------------------------------------------------------------------------------
@@ -83,6 +87,14 @@ class WebScraper(models.Model):
         string="TAGs Stato",
         selection=[('tag-draft', 'Tags Bozza'), ('tag-valid', 'Tags Validi'), ('tag-invalid', 'Tags Non Validi')],
         default='tag-draft',
+    )
+
+    tags_dict = fields.Json(
+        string="TAGs Dict",
+    )
+
+    __unique__ = fields.Json(
+        string="TAGs Unique",
     )
     # endregion --------------------------------------------------------------------------------------------------------
 
@@ -111,33 +123,39 @@ class WebScraper(models.Model):
         selection=[('data-draft', 'Datas Bozza'), ('data-valid', 'Datas Validi'), ('data-invalid', 'Datas Non Validi')],
         default='data-draft',
     )
+
+    datas_list = fields.Json(
+        string="DATAs List",
+    )
     # endregion --------------------------------------------------------------------------------------------------------
 
-    # region FIELD DATAs -----------------------------------------------------------------------------------------------
+    # region FIELD RECs -----------------------------------------------------------------------------------------------
     records = fields.Text(
-        string="RECORDs",
+        string="RECs",
         help="Dati recuperati tramite lo scraping",
     )
 
     records_toggle = fields.Boolean(
-        string="RECORDs Mostra",
+        string="RECs Mostra",
         default=True,
     )
 
     records_errors = fields.Text(
-        string="RECORDs Errori",
+        string="RECs Errori",
     )
 
     records_errors_toggle = fields.Boolean(
-        string="RECORDs Errori Mostra",
+        string="RECs Errori Mostra",
         default=True,
     )
 
     records_state = fields.Selection(
-        string="RECORDs Stato",
-        selection=[('record-draft', 'Datas Bozza'), ('record-valid', 'Datas Validi'), ('record-invalid', 'Datas Non Validi')],
+        string="RECs Stato",
+        selection=[('record-draft', 'Datas Bozza'), ('record-valid', 'Datas Validi'),
+                   ('record-invalid', 'Datas Non Validi')],
         default='record-draft',
     )
+
     # endregion --------------------------------------------------------------------------------------------------------
 
     def validate_urls(self):
@@ -160,10 +178,13 @@ class WebScraper(models.Model):
 
         self.urls_state = 'url-invalid' if urls_errors else 'url-valid'
         self.urls_errors = urls_errors if urls_errors else False
+        self.urls_list = False if urls_errors else url_list
 
     def validate_tags(self):
         self.ensure_one()
         tags_errors = ""
+        tags_dict = {}
+        __unique__ = []
 
         if not self.tags:
             self.tags_state = 'tag-invalid'
@@ -176,13 +197,27 @@ class WebScraper(models.Model):
             return
 
         try:
-            tag_list = json.loads(self.tags)
+            tags_dict = json.loads(self.tags)
             model_name = self.model_id.model  # Nome del modello di destinazione
             model_rec = self.env[model_name]  # Record del modello di destinazione
             model_fields_name = list(model_rec._fields.keys())  # Nomi dei campi del modello di destinazione
-            if not isinstance(tag_list, dict):
+            if not isinstance(tags_dict, dict):
                 raise Exception("TAGs deve essere un Dizionario")
-            for k, v in tag_list.items():
+
+            # Controllo campo __unique__
+            if '__unique__' not in tags_dict:
+                raise Exception(f'Manca campo "__unique__": [<lista campi per identificare univocamente il record>].')
+            __unique__ = tags_dict.get('__unique__')
+            if not isinstance(__unique__, list):
+                raise Exception(
+                    f'Il Campo "__unique__" deve essere una "lista" di campi per identificare univocamente il record.')
+            for field in __unique__:
+                if field not in model_fields_name:
+                    raise Exception(
+                        f'Il Campo "{field}" contenuto nel campo "__unique__" non esiste nel modello "{model_name}".')
+            tags_dict.pop('__unique__')
+
+            for k, v in tags_dict.items():
                 if not isinstance(k, str) and not isinstance(v, str):
                     tags_errors += f'Sia la "Chiave"="{k}" che il "Valore"="{v}" devono essere di tipo stringa.\n'
                 if not isinstance(k, str):
@@ -193,11 +228,14 @@ class WebScraper(models.Model):
                     tags_errors += f'Nella "Chiave" = "{k}" il "Valore" = "{v}" non può essere una stringa vuota.\n'
                 if k not in model_fields_name:
                     tags_errors += f'La chiave "{k}" non esiste nel modello "{model_name}.\n'
+
         except Exception as e:
             tags_errors = str(e)
 
         self.tags_state = 'tag-invalid' if tags_errors else 'tag-valid'
         self.tags_errors = tags_errors if tags_errors else False
+        self.tags_dict = {} if tags_errors else tags_dict
+        self.__unique__ = [] if tags_errors else __unique__
 
     def scrape_datas(self):
         self.ensure_one()
@@ -231,20 +269,15 @@ class WebScraper(models.Model):
             return
         # endregion ----------------------------------------------------------------------------------------------------
 
-        url_list = [url.strip() for url in self.urls.split(',')]  # Rimuove gli spazi
-
-        tag_list = json.loads(self.tags)
-
-        for i, url in enumerate(url_list):
+        for i, url in enumerate(self.urls_list):
             try:
+                data_dict = {}
+                data_dict_errors = ""
                 response = requests.get(url, headers=headers, data=payload, timeout=5)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.text, 'html.parser')
 
-                data_dict = {}
-                data_dict_errors = ""
-
-                for name_field, tag_to_scrape in tag_list.items():
+                for name_field, tag_to_scrape in self.tags_dict.items():
                     try:
                         find_tag = soup.select_one(tag_to_scrape)
                         if not find_tag:
@@ -253,6 +286,8 @@ class WebScraper(models.Model):
                         data_dict[name_field] = find_value
                     except Exception as e:
                         data_dict_errors += f' - Campo "{name_field}" - TAG "{tag_to_scrape}": {str(e)}\n'
+
+                # Mi preparo a passare al URL successivo
                 datas_list.append(data_dict)
                 datas_errors += f"{data_dict_errors}"
                 datas_errors += f"\n" if datas_errors else ""
@@ -262,15 +297,27 @@ class WebScraper(models.Model):
 
         self.datas_state = 'data-invalid' if datas_errors else 'data-valid'
         self.datas_errors = datas_errors if datas_errors else False
-        self.datas = json.dumps(datas_list, indent=4)
+        self.datas_list = [] if datas_errors else datas_list
 
     def create_records(self):
         self.ensure_one()
+        records_errors = ""
+
         if self.datas_state != "data-valid":
             self.records_state = 'record-invalid'
             self.records_errors = "Validare il campo Dati prima di procedere."
             return
-        datas = json.loads(self.datas)
-        self.records = self.env[self.model_id.model].create(datas)
-        self.records_state = 'record-valid'
-        self.records_errors = False
+
+        for i, data in enumerate(self.datas_list):
+            try:
+                Model = self.env[self.model_id.model]
+                domain = [(x, '=', data[x]) for x in self.__unique__]
+                rec_exist = Model.search(domain)
+                if rec_exist:
+                    raise Exception(f'SKIP "__unique__": {rec_exist} già nel db: {self.model_id.model}({rec_exist.id})')
+                record = Model.create(data)
+            except Exception as e:
+                records_errors += f"REC #{i} → {str(e)}\n"
+
+        self.records_state = 'record-invalid' if records_errors else 'record-valid'
+        self.records_errors = records_errors if records_errors else False
