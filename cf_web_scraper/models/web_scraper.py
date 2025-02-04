@@ -4,8 +4,9 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
-from odoo import models, fields
+from odoo import models, fields, api
 
+BATCH = 20
 payload = ""
 headers = {
     "User-Agent":
@@ -55,8 +56,15 @@ class WebScraper(models.Model):
 
     urls_state = fields.Selection(
         string="URLs Stato",
-        selection=[('url-draft', 'Url Bozza'), ('url-valid', 'Url Validi'), ('url-invalid', 'Url Non Validi')],
         default='url-draft',
+        selection=[
+            ('url-draft', 'Url Bozza'), ('url-partially', 'Url Parziali'), ('url-valid', 'Url Validi'),
+            ('url-invalid', 'Url Non Validi')
+        ],
+    )
+
+    urls_processed = fields.Integer(
+        string="URLs Processati",
     )
 
     urls_list = fields.Json(
@@ -120,12 +128,24 @@ class WebScraper(models.Model):
 
     datas_state = fields.Selection(
         string="DATAs Stato",
-        selection=[('data-draft', 'Datas Bozza'), ('data-valid', 'Datas Validi'), ('data-invalid', 'Datas Non Validi')],
         default='data-draft',
+        selection=[
+            ('data-draft', 'Datas Bozza'), ('data-partially', 'Datas Parziali'), ('data-valid', 'Datas Validi'),
+            ('data-invalid', 'Datas Non Validi')
+        ],
     )
 
     datas_list = fields.Json(
         string="DATAs List",
+    )
+
+    datas_processed = fields.Integer(
+        string="DATAs Processati",
+    )
+
+    datas_too_long = fields.Integer(
+        string="DATAs Count",
+        compute="_compute_datas_too_long",
     )
     # endregion --------------------------------------------------------------------------------------------------------
 
@@ -167,7 +187,8 @@ class WebScraper(models.Model):
 
     # endregion --------------------------------------------------------------------------------------------------------
 
-    def validate_urls(self):
+    def validate_urls(self, start_from=0):
+        logging.info("START: validate_urls()")
         self.ensure_one()
         urls_errors = ""
 
@@ -176,18 +197,35 @@ class WebScraper(models.Model):
             self.urls_errors = "Il campo URLs è vuoto, occorre impostarlo per procedere"
             return
 
-        url_list = [url.strip() for url in self.urls.split(',')]  # Rimuove gli spazi
+        urls_list = [url.strip() for url in self.urls.split(',')]  # Rimuove gli spazi
+        urls_list = urls_list[start_from:]
 
-        for i, url in enumerate(url_list):
+        for i, url in enumerate(urls_list, 1):
             try:
                 response = requests.get(url, headers=headers, data=payload, timeout=5)
                 response.raise_for_status()
+                logging.info(f" - URL ({i}/{len(urls_list)}): {url} OK")
+                if i % BATCH == 0:
+                    logging.info(f" - Processati {i} URLs")
+                    logging.info(f" Salvo i progressi nel DB")
+                    self.urls_processed = i
+                    self.urls_state = 'url-partially'
+                    self.env.cr.commit()
             except Exception as e:
-                urls_errors += f"URL #{i}: {url} → {str(e)}\n"
+                msg = f" - URL #{i}: {url} → {str(e)}"
+                logging.error(msg)
+                urls_errors += f"{msg}\n"
 
         self.urls_state = 'url-invalid' if urls_errors else 'url-valid'
         self.urls_errors = urls_errors if urls_errors else False
-        self.urls_list = False if urls_errors else url_list
+        self.urls_list = False if urls_errors else urls_list
+        logging.info("END: validate_urls()")
+
+    def validate_urls_from_stop(self):
+        logging.info("START: validate_urls_from_stop()")
+        self.ensure_one()
+        self.validate_urls(self.urls_processed)
+        logging.info("END: validate_urls_from_stop()")
 
     def validate_tags(self):
         self.ensure_one()
@@ -246,7 +284,8 @@ class WebScraper(models.Model):
         self.tags_dict = {} if tags_errors else tags_dict
         self.__unique__ = [] if tags_errors else __unique__
 
-    def scrape_datas(self):
+    def scrape_datas(self, start_from=0):
+        logging.info("START: scrape_datas()")
         self.ensure_one()
         datas_errors = ""
         datas_list = []
@@ -278,7 +317,9 @@ class WebScraper(models.Model):
             return
         # endregion ----------------------------------------------------------------------------------------------------
 
-        for i, url in enumerate(self.urls_list):
+        urls_list = self.urls_list[start_from:]
+
+        for i, url in enumerate(urls_list, 1):
             try:
                 data_dict = {}
                 data_dict_errors = ""
@@ -300,20 +341,37 @@ class WebScraper(models.Model):
                 datas_list.append(data_dict)
                 datas_errors += f"{data_dict_errors}"
                 datas_errors += f"\n" if datas_errors else ""
+                logging.info(f" - URL ({i}/{len(urls_list)}): {url} OK")
+                if i % BATCH == 0:
+                    logging.info(f" - Scraped {i} DATAs")
+                    logging.info(f" Salvo i progressi nel DB")
+                    self.datas_processed = i
+                    self.datas_state = 'data-partially'
+                    self.datas_list = datas_list
+                    self.env.cr.commit()
 
             except Exception as e:
-                datas_errors += f"URL #{i}: {url} → {str(e)}\n"
+                msg = f" - URL #{i}: {url} → {str(e)}"
+                logging.error(msg)
+                datas_errors += f"{msg}\n"
 
         self.datas_state = 'data-invalid' if datas_errors else 'data-valid'
         self.datas_errors = datas_errors if datas_errors else False
         self.datas_list = [] if datas_errors else datas_list
+        logging.info("END: scrape_datas()")
+
+    def scrape_datas_from_stop(self):
+        logging.info("START: scrape_datas_from_stop()")
+        self.ensure_one()
+        self.scrape_datas(self.datas_processed)
+        logging.info("END: scrape_datas_from_stop()")
 
     def create_records(self):
         self.ensure_one()
         records_errors = ""
         records_warnings = ""
 
-        if self.datas_state != "data-valid":
+        if self.datas_state not in ["data-valid", "data-partially"]:
             self.records_state = 'record-invalid'
             self.records_errors = "Validare il campo Dati prima di procedere."
             return
@@ -335,3 +393,9 @@ class WebScraper(models.Model):
         self.records_state = 'record-invalid' if records_errors else 'record-warning' if records_warnings else 'record-valid'
         self.records_errors = records_errors if records_errors else False
         self.records_warnings = records_warnings if records_warnings else False
+
+    @api.depends('datas')
+    def _compute_datas_too_long(self):
+        for rec in self:
+            data_len = len(rec.datas) if rec.datas else 0
+            rec.datas_too_long = True if data_len > 1000 else False

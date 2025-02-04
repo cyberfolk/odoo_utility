@@ -4,6 +4,7 @@
         <field name="model">web.scraper</field>
         <field name="arch" type="xml">
             <form string="Web Scraper">
+                <field name="datas_too_long" invisible="1"/>
                 <header>
                     <button name="validate_urls" string="Valida URLs" type="object" class="btn btn-primary"/>
                     <button name="validate_tags" string="Valida TAGs" type="object" class="btn btn-primary"/>
@@ -22,15 +23,18 @@
                             <field name="model_id"/>
                         </group>
                         <group string="URLs" name="g_urls">
+                            <button name="validate_urls_from_stop" string="Riprendi Valida URLs" type="object" class="btn btn-info w-25" invisible="urls_state != 'url-partially'" colspan="2"/>
                             <field name="urls_state" widget="badge" string="Stato"
                                    decoration-muted="urls_state == 'url-draft'"
                                    decoration-success="urls_state == 'url-valid'"
+                                   decoration-info="urls_state == 'url-partially'"
                                    decoration-danger="urls_state == 'url-invalid'"
                             />
+                            <field name="urls_processed" string="Stop" help="Numero di URLs processati" readonly="1" invisible="urls_state != 'url-partially'"/>
                             <div class="w-100 d-flex" colspan="2">
                                 <div class="o_form_label fw-bold" style="width: 7%;">URLs</div>
                                 <field name="urls_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
-                                <field name="urls" placeholder=" -- Inserisci URL --" invisible="not urls_toggle" nolabel="1" style="width: 87%"
+                                <field name="urls" placeholder=" -- Inserisci URLs --" invisible="not urls_toggle" nolabel="1" style="width: 87%"
                                        decoration-danger="urls_state == 'url-invalid'"
                                 />
                             </div>
@@ -49,7 +53,7 @@
                             <div class="w-100 d-flex" colspan="2">
                                 <div class="o_form_label fw-bold" style="width: 7%;">TAGs</div>
                                 <field name="tags_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
-                                <field name="tags" placeholder=" -- Inserisci URL --" invisible="not tags_toggle" nolabel="1" style="width: 87%"
+                                <field name="tags" placeholder=" -- Inserisci TAGs --" invisible="not tags_toggle" nolabel="1" style="width: 87%"
                                        decoration-danger="tags_state == 'tag-invalid'"
                                 />
                             </div>
@@ -60,17 +64,21 @@
                             </div>
                         </group>
                         <group string="Dati Estratti" name="g_datas">
+                            <button name="scrape_datas_from_stop" string="Riprendi Scrape DATAs" type="object" class="btn btn-info w-25" invisible="datas_state != 'data-partially'" colspan="2"/>
                             <field name="datas_state" widget="badge" string="Stato"
                                    decoration-muted="datas_state == 'data-draft'"
                                    decoration-success="datas_state == 'data-valid'"
+                                   decoration-info="datas_state == 'data-partially'"
                                    decoration-danger="datas_state == 'data-invalid'"
                             />
+                            <field name="datas_processed" string="Stop" help="Numero di URLs processati" readonly="1" invisible="datas_state != 'data-partially'"/>
                             <div class="w-100 d-flex" colspan="2">
                                 <div class="o_form_label fw-bold" style="width: 7%;">DATAs</div>
                                 <field name="datas_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
-                                <field name="datas" invisible="not datas_toggle" nolabel="1" style="width: 87%" readonly="1"
-                                       decoration-danger="datas_state == 'data-invalid'"
-                                />
+                                <div invisible="not datas_toggle">
+                                    <field name="datas" nolabel="1" style="width: 87%" readonly="1" invisible="datas_too_long"/>
+                                    <p invisible="not datas_too_long" class="text-muted">DATAs ha troppi caratteri e non può essere visualizzato in questa vista.</p>
+                                </div>
                             </div>
                             <div class="w-100 d-flex" colspan="2" invisible="datas_state in ['data-draft', 'data-valid']">
                                 <div class="o_form_label fw-bold" style="width: 7%;">Errori</div>
@@ -96,14 +104,14 @@
                                 <div class="o_form_label fw-bold" style="width: 7%;">Errori</div>
                                 <field name="records_errors_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
                                 <field name="records_errors" invisible="not records_errors_toggle" nolabel="1" style="width: 87%" readonly="1"
-                                    decoration-danger="1"
+                                       decoration-danger="1"
                                 />
                             </div>
                             <div class="w-100 d-flex" colspan="2" invisible="records_state != 'record-warning'">
                                 <div class="o_form_label fw-bold" style="width: 7%;">Warn</div>
                                 <field name="records_warnings_toggle" widget="boolean_toggle" nolabel="1" colspan="2" style="width: 6%"/>
                                 <field name="records_warnings" invisible="not records_warnings_toggle" nolabel="1" style="width: 87%" readonly="1"
-                                    decoration-warning="1"
+                                       decoration-warning="1"
                                 />
                             </div>
                         </group>
