@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--INFO: Cron di supporto allo sviluppo -->
+<!-- INFO: Cron di supporto allo sviluppo -->
 <odoo>
     <data noupdate="1">
         <record id="cf_dev_cron" model="ir.cron">
-            <field name="name">Cron di supporto allo sviluppo</field>
-            <field eval="False" name="active"/>
+            <field name="name">Dev | Utility</field>
+            <field name="active" eval="False"/>
             <field name="interval_number">6</field>
             <field name="interval_type">hours</field>
             <field name="numbercall">-1</field>

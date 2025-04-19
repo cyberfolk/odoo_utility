@@ -2,8 +2,8 @@
 # Powered by cyberfolk
 
 {
-    'name': "Cyberfolk | Utility",
-    'icon': '/cf_utility/static/description/cyberfolk.png',
+    'name': "Cyberfolk | Dev Utility",
+    'icon': '/cf_dev_utility/static/description/cyberfolk.png',
     'sequence': 2,
     'version': '0.0.1',
     'category': 'Utility',
