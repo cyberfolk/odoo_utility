@@ -6,10 +6,11 @@
             <search>
                 <field name="name"/>
                 <field name="description"/>
-                <filter name="filter_no_completed" string="Non Completate" domain="[('completed', '=', False)]"/>
+                <filter name="filter_no_completed" string="Non Completate" domain="[('status', '!=', 'done')]"/>
                 <filter name="groupby_importance" string="Importanza" context="{'group_by': 'importance'}"/>
                 <filter name="groupby_type" string="Tipo" context="{'group_by': 'type'}"/>
                 <filter name="groupby_time" string="Tempo" context="{'group_by': 'time'}"/>
+                <filter name="groupby_status" string="Status" context="{'group_by': 'status'}"/>
             </search>
         </field>
     </record>
@@ -18,16 +19,21 @@
         <field name="name">todo.tree</field>
         <field name="model">todo</field>
         <field name="arch" type="xml">
-            <tree editable="top" decoration-muted="completed" decoration-success="focus">
+            <tree editable="top"
+                  decoration-muted="status in ['done', 'skip']"
+                  decoration-success="status in ['done', 'focus']">
                 <field name="sequence" widget="handle"/>
                 <field name="score" string="⭐" optional="show" widget="percentage"/>
+                <field name="status"
+                       decoration-success="status == 'focus'"
+                       decoration-info="status == 'todo'"
+                       decoration-muted="status == 'done'"
+                       decoration-warning="status == 'skip'"/>
                 <field name="type"/>
                 <field name="name"/>
                 <field name="importance"/>
                 <field name="time" widget="float_time"/>
                 <field name="description" class="fst-italic"/>
-                <field name="focus"/>
-                <field name="completed" optional="hide"/>
             </tree>
         </field>
     </record>

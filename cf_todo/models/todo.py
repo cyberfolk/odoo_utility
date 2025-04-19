@@ -1,5 +1,4 @@
 import logging
-import math
 
 from odoo.exceptions import ValidationError
 
@@ -8,6 +7,7 @@ from odoo import fields, models, api
 _logger = logging.getLogger(__name__)
 
 TODO_TYPE_SELECTION = [('add', '[ADD]'), ('del', '[DEL]'), ('upd', '[UPD]'), ('rfct', '[RFCT]')]
+STATUS_SELECTION = [('todo', 'TODO'), ('focus', 'FOCUS'), ('done', 'FATTA'), ('skip', 'SKIP')]
 
 
 class Todo(models.Model):
@@ -16,10 +16,13 @@ class Todo(models.Model):
 
     name = fields.Char(
         string="Nome",
+        required=True
     )
 
     time = fields.Float(
         string="Tempo",
+        default=8,
+        required=True
     )
 
     description = fields.Text(
@@ -29,21 +32,14 @@ class Todo(models.Model):
     type = fields.Selection(
         selection=TODO_TYPE_SELECTION,
         string="Tipo",
-        default='upd'
+        default='upd',
+        required=True
     )
 
     importance = fields.Integer(
         string="Importanza",
-        default=3
-    )
-
-    completed = fields.Boolean(
-        string="Completato",
-        default=False
-    )
-
-    focus = fields.Boolean(
-        string="Focus",
+        default=3,
+        required=True
     )
 
     score = fields.Float(
@@ -53,6 +49,12 @@ class Todo(models.Model):
         help="Punteggio calcolato da Importanza e Tempo"
     )
 
+    status = fields.Selection(
+        selection=STATUS_SELECTION,
+        default='todo',
+        required=True
+    )
+
     @api.constrains('importance')
     def _check_importance(self):
         if self.importance < 1 or self.importance > 5:
@@ -60,16 +62,25 @@ class Todo(models.Model):
 
     @api.constrains('time')
     def _check_time(self):
-        if self.importance < 0.5 or self.importance > 16:
+        if self.time < 0.5 or self.time > 16:
             raise ValidationError('Tempo deve essere compresa tra 00:30 e 16:00')
 
     @api.depends('time', 'importance')
     def _compute_score(self):
         for rec in self:
-            impo_norm = 1 + rec.importance / 5  # [1.2; 2]
-            time_norm = 1 + rec.time / 16  # [1.03125; 2]
-            score = impo_norm / time_norm - 1  # [0,163; 1]
-            rec.score = math.floor(score * 100) / 100  # Tronco a due cifre decimali
+            if rec.time and rec.importance:
+                impo_norm = rec.importance / 5  # [1, 5] -> [0.2, 1]
+                time_norm = rec.time / 16  # [0.5, 16] -> [0.03125, 1]
+                raw_score = impo_norm - time_norm
+
+                # Normalizzazione tra -0.8 e 0.96875
+                min_score = -0.8
+                max_score = 0.96875
+
+                normalized = (raw_score - min_score) / (max_score - min_score)
+                rec.score = round(normalized, 2)
+            else:
+                rec.score = 0.0
 
     def complete_todo(self):
         self.completed = True
