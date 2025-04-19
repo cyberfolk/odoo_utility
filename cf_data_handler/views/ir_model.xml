@@ -1,0 +1,46 @@
+<odoo>
+    <record id="view_model_tree" model="ir.ui.view">
+        <field name="model">ir.model</field>
+        <field name="inherit_id" ref="base.view_model_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="/tree" position="replace">
+                <tree>
+                    <field name="model"/>
+                    <field name="name"/>
+                    <field name="unique_fields_str" placeholder="es. name,code,date,color" optional="show"/>
+                    <field name="unique_fields_display" optional="show"/>
+                    <field name="state" optional="hide"/>
+                    <field name="transient" optional="hide"/>
+                </tree>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_model_form" model="ir.ui.view">
+        <field name="model">ir.model</field>
+        <field name="inherit_id" ref="base.view_model_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='modules']" position="after">
+                <field name="unique_fields_str" placeholder="es. name,code,date,color"/>
+                <field name="unique_fields_display"/>
+                <field name="warning_support_field" invisible="1"/>
+                <div name="warning_support_field" class="alert alert-warning" role="alert" invisible="not warning_support_field" colspan="2">
+                    <div name="warning_unique_field" invisible="not warning_unique_field">
+                        <b>Warning Field - Unique:</b>
+                        <field name="warning_unique_field" colspan="2" nolabel="1"/>
+                    </div>
+                    <div name="warning_x_data_hash_field" invisible="not warning_x_data_hash_field" class="mt-3">
+                        <b>Warning Field - Data Hash:</b>
+                        <field name="warning_x_data_hash_field" colspan="2" nolabel="1"/>
+                        <button type="object" class="mt-1 px-1 py-0 btn btn-primary" name="x_data_hash_field_fix" string="Correggi Data Hash"/>
+                    </div>
+                    <div name="warning_x_data_id_field" invisible="not warning_x_data_id_field" class="mt-3">
+                        <b>Warning Field - Data ID:</b>
+                        <field name="warning_x_data_id_field" nolabel="1"/>
+                        <button type="object" class="mt-1 px-1 py-0 btn btn-primary" name="x_data_id_field_fix" string="Correggi Data ID"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

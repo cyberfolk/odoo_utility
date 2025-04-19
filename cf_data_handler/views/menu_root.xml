@@ -1,0 +1,24 @@
+<odoo>
+    <record id="action_menu_data_handler" model="ir.actions.act_window">
+        <field name="name">Data Handler</field>
+        <field name="res_model">data.handler</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_menu_data_handler_custom" model="ir.actions.act_window">
+        <field name="name">Import Custom</field>
+        <field name="res_model">data.handler.custom</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="action_menu_ir_model_unique_fields" model="ir.actions.act_window">
+        <field name="name">Modelli</field>
+        <field name="res_model">ir.model</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem sequence="0" id="menu_data_handler_base" name="Data Handler" web_icon="cf_data_handler,static/description/icon.png">
+        <menuitem sequence="1" id="menu_data_handler" name="Manage Data" action="action_menu_data_handler"/>
+        <menuitem sequence="2" id="menu_data_handler_custom" name="Import Custom" action="action_menu_data_handler_custom"/>
+        <menuitem sequence="2" id="menu_ir_model_unique_fields" name="Modelli" action="action_menu_ir_model_unique_fields"/>
+    </menuitem>
+</odoo>

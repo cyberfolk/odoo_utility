@@ -1,0 +1,124 @@
+<odoo>
+    <record id="data_handler_view_search" model="ir.ui.view">
+        <field name="name">data.handler.search</field>
+        <field name="model">data.handler</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="active"/>
+                <field name="state"/>
+                <field name="model_id"/>
+                <filter name="active" string="Archiviati" domain="[('active', '=', False)]"/>
+                <filter name="active" string="Attivi" domain="[('active', '=', True)]"/>
+                <filter name="group_by_model_id" string="Modello" context="{'group_by': 'model_id'}"/>
+                <filter name="group_by_state" string="Stato" context="{'group_by': 'state'}"/>
+                <filter name="group_by_name" string="Name" context="{'group_by': 'name'}"/>
+            </search>
+        </field>
+    </record>
+    <record id="data_handler_view_tree" model="ir.ui.view">
+        <field name="name">data.handler.tree</field>
+        <field name="model">data.handler</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="model_id"/>
+                <field name="is_standard_import"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'completed_correctly'"
+                       decoration-primary="state == 'draft'"
+                       decoration-info="state == 'partially_processed'"
+                       decoration-warning="state == 'completed_with_errors'"/>
+                <field name="create_date"/>
+                <field name="write_date"/>
+            </tree>
+        </field>
+    </record>
+    <record id="data_handler_view_form" model="ir.ui.view">
+        <field name="name">data.handler.form</field>
+        <field name="model">data.handler</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="datas_len" invisible="1"/>
+                <header>
+                    <field name="error_support_field" invisible="1"/>
+                    <button type="object" class="btn btn-primary" name="start_import_from_zero" string="Processa dall'inizio"
+                            invisible="error_support_field or not datas"/>
+                    <button type="object" class="btn btn-info" name="continue_import_from_pause" string="Riprendi importazione"
+                            invisible="state != 'partially_processed or error_support_field' or not datas"/>
+                    <button type="object" class="btn btn-warning" name="import_reported_errors" string="Processa errori segnalati"
+                            invisible="error_support_field or not datas"/>
+                    <button type="object" class="btn btn-warning" name="download_datas" string="Scarica Dati"
+                            invisible="not datas"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <div name="warning_no_datas" class="alert alert-warning" role="alert" invisible="datas">
+                    <b>WARNING - No Datas:</b>
+                    <br/>
+                    Non è ancora stato caricato alcun file di dati.
+                </div>
+                <div name="error_support_field" class="alert alert-danger" role="alert" invisible="not error_support_field">
+                    <div name="error_unique_field" invisible="not error_unique_field">
+                        <b>Error Field - Unique:</b>
+                        <field name="error_unique_field" colspan="2" nolabel="1"/>
+                        <span>Sistemare il Campo da Data Handler > Modelli > &amp;nbsp;</span>
+                        <field name="model_name" nolabel="1"/>
+                    </div>
+                    <div name="error_x_data_hash_field" invisible="not error_x_data_hash_field" class="mt-3">
+                        <b>Error Field - Data Hash:</b>
+                        <field name="error_x_data_hash_field" colspan="2" nolabel="1"/>
+                        <button type="object" class="mt-1 px-1 py-0 btn btn-primary" name="fix_error_x_data_hash_field" string="Correggi Data Hash"/>
+                    </div>
+                    <div name="error_x_data_id_field" invisible="not error_x_data_id_field" class="mt-3">
+                        <b>Error Field - Data ID:</b>
+                        <field name="error_x_data_id_field" nolabel="1"/>
+                        <button type="object" class="mt-1 px-1 py-0 btn btn-primary" name="fix_error_x_data_id_field" string="Correggi Data ID"/>
+                    </div>
+                </div>
+                <sheet>
+                    <div class="oe_title" colspan="2">
+                        <label for="name" class="oe_inline"/>
+                        <h1>
+                            <field class="text-nowrap" name="name" nolabel="1"/>
+                        </h1>
+                    </div>
+                    <group col='3'>
+                        <group colspan="1">
+                            <field name="model_id"/>
+                            <field name="datas_file_name" invisible="1"/>
+                            <field name="datas_file" widget="binary" filename="datas_file_name"/>
+                        </group>
+                        <group colspan="1">
+                            <field name="is_standard_import"/>
+                            <field name="custom_handler_id" invisible="is_standard_import" required="not is_standard_import"/>
+                            <field name="rec_total"/>
+                        </group>
+                        <group colspan="1">
+                            <field string="Data Creazione" name="create_date"/>
+                            <field string="Ultima Modifica" name="write_date"/>
+                        </group>
+                        <group colspan="1"/>
+                        <group string="Elenco Duplicati" colspan="4">
+                            <field colspan="2" name="list_duplicated" nolabel="1"/>
+                        </group>
+                        <group string="Elenco Errori" colspan="4">
+                            <field colspan="2" name="list_error" nolabel="1"/>
+                        </group>
+                        <group string="Dati" colspan="4">
+                            <field colspan="2" name="datas" nolabel="1" invisible="datas_len &gt; 2000000" widget="code" options="{'mode': 'js'}" />
+                            <div class="text-muted" colspan="2" invisible="datas_len &lt; 2000000">
+                                <div>Impossibile visualizzare i dati, perchè contengono
+                                    <field class="fw-bold d-inline" name="datas_len"/>
+                                    caratteri.
+                                </div>
+                                <div>Per visualizzare i dati, cliccare sul pulsante
+                                    <b>Scarica Dati</b>
+                                </div>
+                            </div>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>
