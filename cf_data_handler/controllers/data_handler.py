@@ -38,10 +38,12 @@ class DataHandlerController(http.Controller):
             Model = request.env[model]
             _model = model.replace('.', '_')
             records = request.env[model].sudo().browse(ids)
+            ir_model = request.env['ir.model'].sudo().search([('model', '=', model)], limit=1)
+            skip_fields = ir_model.skip_fields
 
             dicts = []
             for rec in records:
-                dikt = Model.from_rec_to_dikt(rec)
+                dikt = Model.from_rec_to_dikt(rec, skip_fields)
                 dicts.append(dikt)
 
             dicts_json = json.dumps(dicts, indent=4, ensure_ascii=False)

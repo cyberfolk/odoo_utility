@@ -21,7 +21,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='modules']" position="after">
                 <field name="unique_fields_str" placeholder="es. name,code,date,color"/>
-                <field name="unique_fields_display"/>
+<!--                <field name="unique_fields_display"/>-->
                 <field name="warning_support_field" invisible="1"/>
                 <div name="warning_support_field" class="alert alert-warning" role="alert" invisible="not warning_support_field" colspan="2">
                     <div name="warning_unique_field" invisible="not warning_unique_field">
@@ -39,6 +39,8 @@
                         <button type="object" class="mt-1 px-1 py-0 btn btn-primary" name="x_data_id_field_fix" string="Correggi Data ID"/>
                     </div>
                 </div>
+                <field name="skip_fields_str" placeholder="es. name,code,date,color"/>
+<!--                <field name="skip_fields_display"/>-->
             </xpath>
         </field>
     </record>

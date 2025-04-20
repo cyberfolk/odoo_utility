@@ -16,7 +16,7 @@ _logger = logging.getLogger(__name__)
 class IrModel(models.Model):
     _inherit = "ir.model"
 
-    # region CAMPI SUPPORT - ALERT
+    # region CAMPI UNIQUE
     unique_fields_str = fields.Char(
         string="Campi Univoci (STR)",
         help="Lista di campi che identificano in modo univo un Record (STR).",
@@ -58,6 +58,51 @@ class IrModel(models.Model):
                     )
             rec.unique_fields = unique_fields
             rec.unique_fields_display = json.dumps(unique_fields)
+
+    # endregion
+
+    # region CAMPI SKIP
+    skip_fields_str = fields.Char(
+        string="Campi Skip (STR)",
+        help="Lista di campi che non vengono gestiti dal data_handler (STR).",
+    )
+
+    skip_fields = fields.Json(
+        string="Campi Skip (JSON)",
+        compute="_compute_skip_fields",
+        help="Lista di campi che non vengono gestiti dal data_handler (JSON).",
+    )
+
+    skip_fields_display = fields.Char(
+        string="Campi Skip (DISPLAY)",
+        compute="_compute_skip_fields",
+        help="Lista di campi che non vengono gestiti dal data_handler (DISPLAY).",
+    )
+
+    @api.depends("skip_fields_str")
+    def _compute_skip_fields(self):
+        for rec in self:
+            if not rec.skip_fields_str:
+                rec.skip_fields = []
+                rec.skip_fields_display = False
+                continue
+
+            ModelClass = rec.env.get(rec.model)  # Ottieni il modello dinamicamente
+            model_fields = ModelClass._fields
+            skip_fields = rec.skip_fields_str.split(',')
+            skip_fields = [field.strip() for field in skip_fields]
+            for field in skip_fields:
+                if field not in model_fields:
+                    raise models.ValidationError(
+                        f'Nel modello "{rec.model}"\n'
+                        f' - Non esiste alcun campo "{field}".\n'
+                        f' - Correggere il campo "Campi Skip" di ir.model({rec.id}).\n'
+                        f'\n'
+                        f'I Campi che si possono usare sono:\n'
+                        f' {list(model_fields.keys())}'
+                    )
+            rec.skip_fields = skip_fields
+            rec.skip_fields_display = json.dumps(skip_fields)
 
     # endregion
 

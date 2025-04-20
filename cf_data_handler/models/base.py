@@ -22,7 +22,7 @@ from ..utilities.utility import clean_list
 
 _logger = logging.getLogger(__name__)
 
-EXCLUDED_FIELDS = {'write_date', 'write_uid', 'create_date', 'create_uid', 'display_name', 'id'}
+EXCLUDED_FIELDS = {'write_date', 'write_uid', 'create_date', 'create_uid', 'display_name', 'id', 'x_data_id', 'x_data_hash'}
 
 
 class Base(models.AbstractModel):
@@ -37,8 +37,11 @@ class Base(models.AbstractModel):
         }
 
     @staticmethod
-    def from_rec_to_dikt(rec):
+    def from_rec_to_dikt(rec, skip_fields=None):
         """Trasforma un record di Odoo in un dizionario."""
+
+        if skip_fields:
+            EXCLUDED_FIELDS.update(skip_fields)
 
         dikt = {}
         for f_name, f_info in rec._fields.items():  # f_name  -> field_name, f_info -> field_info

@@ -16,7 +16,6 @@
         "views/data_handler_custom.xml",
         "views/data_handler.xml",
         "views/ir_model.xml",
-        "views/base.xml",
     ],
     'icon': '/cf_data_handler/static/description/icon.png',
     'sequence': 2,
