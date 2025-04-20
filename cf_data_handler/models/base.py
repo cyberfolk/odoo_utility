@@ -265,10 +265,13 @@ class Base(models.AbstractModel):
                 odoo_dict[f_name] = rec.id if rec else False
             elif f_type in ['many2many', 'one2many']:
                 rec_list = []
+                if not f_value:
+                    continue
                 for x in f_value:
                     rec = self.env[f_comodel].sudo().get_existing_records(x)
                     if x and not rec:
-                        raise Exception(f"Errore: {x} non trovato in {f_comodel}")
+                        rec = self.env[f_comodel].sudo().create(x)
+                        # raise Exception(f"Errore: {x} non trovato in {f_comodel}")
                     rec_list.append(rec)
                 odoo_dict[f_name] = [rec.id for rec in rec_list] if rec_list else False
                 odoo_dict[f_name] = clean_list(odoo_dict[f_name])  # TODO perchè la necessita di clean_list?

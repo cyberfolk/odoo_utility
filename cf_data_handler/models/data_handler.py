@@ -236,7 +236,7 @@ class DataHandler(models.Model):
     def start_import_from_zero(self):
         """Inizia il processo d'importazione del campo json. Inizializza already_done=0 ed list_error="[]",
          poi inizia il processo partendo dal record numero zero."""
-        log_name = f"IMPORT JSON_FIELD FROM ZERO di data.handler({self.id})"
+        log_name = f"IMPORT JSON_FIELD FROM ZERO di {self.name}"
         self.already_done = 0
         self.list_error = "[]"
         data_list = json.loads(self.datas)
@@ -247,7 +247,7 @@ class DataHandler(models.Model):
     def continue_import_from_pause(self):
         """Ricomincia il processo d'importazione del campo json partendo dallo stato da dove si era interrotto.
          Mantiene la list_error già tracciata e riparte a processare dal record numero already_done."""
-        log_name = f"CONTINUE IMPORT JSON_FIELD FROM PAUSE di data.handler({self.id})"
+        log_name = f"CONTINUE IMPORT JSON_FIELD FROM PAUSE {self.name}"
         if self.state != 'partially_processed':
             logging.info(f"*** SKIP  *** {log_name} perchè state = {self.state}")
             return
@@ -263,7 +263,7 @@ class DataHandler(models.Model):
     def import_reported_errors(self):
         """Prova a reimportare i record tracciati nel campo list_error."""
         return
-        # log_name = f"IMPORT REPORTED_ERRORS di data.handler({self.id})"
+        # log_name = f"IMPORT REPORTED_ERRORS {self.name}"
         # if self.state != 'completed_with_errors':
         #     logging.info(f"*** SKIP  *** {log_name} perchè state = {self.state}")
         #     return
