@@ -6,6 +6,9 @@ EXCLUDED_FIELDS = {'write_date', 'write_uid', 'create_date', 'create_uid', 'disp
 class BaseModel(models.AbstractModel):
     _inherit = 'base'
 
+    def dev_tmp(self):
+        pass
+
     def get_fields_dict(self):
         """Ritorna un dict[campo: (tipo, comodel)] e un dict[categoria: [lista campi]]."""
         fields_dict = {}
