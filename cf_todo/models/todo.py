@@ -83,6 +83,6 @@ class Todo(models.Model):
                 rec.score = 0.0
 
     def complete_todo(self):
-        self.completed = True
+        self.status = 'done'
 
     sequence = fields.Integer(string="Sequence", default=10)
