@@ -39,7 +39,9 @@ class DataHandlerController(http.Controller):
             _model = model.replace('.', '_')
             records = request.env[model].sudo().browse(ids)
             ir_model = request.env['ir.model'].sudo().search([('model', '=', model)], limit=1)
-            skip_fields = ir_model.skip_fields
+            skip_fields_base = ir_model.skip_fields or []
+            skip_fields_other = literal_eval(kwargs.get('skip_fields', '[]'))
+            skip_fields = skip_fields_other + skip_fields_base
 
             dicts = []
             for rec in records:
