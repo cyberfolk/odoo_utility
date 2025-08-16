@@ -7,6 +7,14 @@ from odoo.http import route, request
 from odoo import http
 
 
+def get_headers(name_file):
+    headers = [
+        ('Content-Type', 'application/json'),
+        ('Content-Disposition', f'attachment; filename="{name_file}.json"')
+    ]
+    return headers
+
+
 class DataHandlerController(http.Controller):
 
     @route('/data_handler/download_datas', type='http', auth='user')
@@ -18,16 +26,12 @@ class DataHandlerController(http.Controller):
             datas = data_handler.datas or '[]'
             name_file = data_handler.name
 
-            headers = [
-                ('Content-Type', 'application/json'),
-                ('Content-Disposition', f'attachment; filename="{name_file}.json"')
-            ]
+            headers = get_headers(name_file)
             txt = request.make_response(datas, headers=headers)
+            return txt
 
         except Exception as ex:
             raise UserError(f"Errore durante la generazione del json:\n{ex}")
-        else:
-            return txt
 
     @route('/data_handler/export_json', type='http', auth='user')
     def export_json(self, **kwargs):
@@ -36,29 +40,26 @@ class DataHandlerController(http.Controller):
             ids = literal_eval(kwargs.get('ids', ''))
             model = kwargs.get('model', '')
             Model = request.env[model]
-            _model = model.replace('.', '_')
             records = request.env[model].sudo().browse(ids)
             ir_model = request.env['ir.model'].sudo().search([('model', '=', model)], limit=1)
+            name_file = model.replace('.', '_')
             skip_fields_base = ir_model.skip_fields or []
             skip_fields_other = literal_eval(kwargs.get('skip_fields', '[]'))
             skip_fields = skip_fields_other + skip_fields_base
+            custom_transform_method = kwargs.get('custom_transform_method', '')
 
             dicts = []
             for rec in records:
-                dikt = Model.from_rec_to_dikt(rec, skip_fields)
-                dicts.append(dikt)
+                dikt = Model.from_rec_to_dikt(rec, skip_fields, custom_transform_method)
+                if dikt:
+                    dicts.append(dikt)
 
             dicts_json = json.dumps(dicts, indent=4, ensure_ascii=False)
-
             datas = dicts_json or '[]'
 
-            headers = [
-                ('Content-Type', 'application/json'),
-                ('Content-Disposition', f'attachment; filename="{_model}.json"')
-            ]
+            headers = get_headers(name_file)
             txt = request.make_response(datas, headers=headers)
+            return txt
 
         except Exception as ex:
             raise UserError(f"Errore durante export json:\n{ex}")
-        else:
-            return txt

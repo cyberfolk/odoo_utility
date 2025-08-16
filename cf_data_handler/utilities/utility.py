@@ -1,5 +1,9 @@
 import json
 
+EXCLUDED_FIELDS = {
+    'write_date', 'write_uid', 'create_date', 'create_uid', 'display_name', 'id', 'x_data_id', 'x_data_hash'
+}
+
 
 def clean_list(_list):
     """Rimuove tutti i valori None da una lista e ritorna la lista filtrata.

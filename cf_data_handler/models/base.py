@@ -18,11 +18,9 @@ import json
 import logging
 
 from odoo import models
-from ..utilities.utility import clean_list
+from ..utilities.utility import clean_list, EXCLUDED_FIELDS
 
 _logger = logging.getLogger(__name__)
-
-EXCLUDED_FIELDS = {'write_date', 'write_uid', 'create_date', 'create_uid', 'display_name', 'id', 'x_data_id', 'x_data_hash'}
 
 
 class Base(models.AbstractModel):
@@ -37,8 +35,16 @@ class Base(models.AbstractModel):
         }
 
     @staticmethod
-    def from_rec_to_dikt(rec, skip_fields=None):
+    def from_rec_to_dikt(rec, skip_fields=None, custom_transform_method=''):
         """Trasforma un record di Odoo in un dizionario."""
+
+        if custom_transform_method:
+            if not hasattr(rec, custom_transform_method):
+                raise AttributeError(f"Il metodo '{custom_transform_method}' non esiste sul modello {rec._name}")
+            custom_method = getattr(rec, custom_transform_method)
+            if not callable(custom_method):
+                raise TypeError(f"'{custom_transform_method}' esiste ma non è invocabile")
+            return custom_method(rec, skip_fields)
 
         if skip_fields:
             EXCLUDED_FIELDS.update(skip_fields)
